@@ -1,0 +1,44 @@
+{
+  "name": "cypress-mochawesome-screenshot-fixer",
+  "version": "1.0.0",
+  "description": "Fix screenshot paths in mochawesome JSON reports.",
+  "main": "src/index.js",
+  "bin": {
+    "cypress-mochawesome-screenshot-fixer": "bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cypress",
+    "mochawesome",
+    "report",
+    "screenshot",
+    "cypress-split",
+    "testing",
+    "reporter",
+    "mochawesome-merge",
+    "parallel",
+    "ci-cd"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chhakib/cypress-mochawesome-screenshot-fixer"
+  },
+  "bugs": {
+    "url": "https://github.com/chhakib/cypress-mochawesome-screenshot-fixer/issues"
+  },
+  "homepage": "https://github.com/chhakib/cypress-mochawesome-screenshot-fixer#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
+}
