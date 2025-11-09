@@ -93,9 +93,13 @@ function parseArgs() {
  * Main CLI function
  */
 function main() {
+  let options;
+
   try {
     // Parse arguments
-    const { jsonPath, options } = parseArgs();
+    const parsed = parseArgs();
+    options = parsed.options;
+    const jsonPath = parsed.jsonPath;
 
     // Display configuration if verbose
     if (options.verbose) {

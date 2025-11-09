@@ -34,7 +34,47 @@ function fixScreenshotPaths(jsonPath, options = {}) {
       throw new Error(`JSON file not found: ${jsonPath}`);
     }
 
-    const jsonContent = fs.readFileSync(jsonPath, 'utf8');
+    // Read file as buffer to detect encoding
+    const buffer = fs.readFileSync(jsonPath);
+    let jsonContent;
+
+    // Detect BOM and encoding
+    if (buffer.length >= 2) {
+      // Check for UTF-16 LE BOM (FF FE)
+      if (buffer[0] === 0xFF && buffer[1] === 0xFE) {
+        if (config.verbose) {
+          console.log('Detected UTF-16 LE encoding with BOM');
+        }
+        jsonContent = buffer.toString('utf16le').replace(/^\uFEFF/, ''); // Remove BOM
+      }
+      // Check for UTF-16 BE BOM (FE FF)
+      else if (buffer[0] === 0xFE && buffer[1] === 0xFF) {
+        if (config.verbose) {
+          console.log('Detected UTF-16 BE encoding with BOM');
+        }
+        // Convert from BE to LE
+        const leBuffer = Buffer.alloc(buffer.length);
+        for (let i = 0; i < buffer.length; i += 2) {
+          leBuffer[i] = buffer[i + 1];
+          leBuffer[i + 1] = buffer[i];
+        }
+        jsonContent = leBuffer.toString('utf16le').replace(/^\uFEFF/, '');
+      }
+      // Check for UTF-8 BOM (EF BB BF)
+      else if (buffer.length >= 3 && buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
+        if (config.verbose) {
+          console.log('Detected UTF-8 encoding with BOM');
+        }
+        jsonContent = buffer.toString('utf8').replace(/^\uFEFF/, ''); // Remove BOM
+      }
+      // No BOM, assume UTF-8
+      else {
+        jsonContent = buffer.toString('utf8');
+      }
+    } else {
+      jsonContent = buffer.toString('utf8');
+    }
+
     let reportData;
 
     try {
