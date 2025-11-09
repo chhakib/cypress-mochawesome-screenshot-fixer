@@ -26,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixes screenshot paths in JSON-encoded context fields
 - Transforms `\\spec.cy.js\\screenshot.png` to `../screenshots/spec.cy.js/screenshot.png`
 - Modifies JSON files in-place (no file copying)
-- Handles multiple screenshots from retry attempts
 - Production-ready with proper error handling
 - Simple and focused: does one thing well
 
