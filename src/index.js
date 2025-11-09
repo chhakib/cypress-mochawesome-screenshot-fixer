@@ -174,7 +174,8 @@ function processTest(test, config, stats) {
     contextObj.value.forEach((valueArray, arrayIndex) => {
       if (Array.isArray(valueArray)) {
         valueArray.forEach((screenshotPath, pathIndex) => {
-          if (typeof screenshotPath === 'string' && screenshotPath.includes('\\')) {
+          // Check if this is a screenshot path that needs fixing (starts with / or \)
+          if (typeof screenshotPath === 'string' && (screenshotPath.startsWith('/') || screenshotPath.startsWith('\\'))) {
             // This is a screenshot path that needs fixing
             const fixedPath = fixScreenshotPath(screenshotPath, config);
 
@@ -211,14 +212,16 @@ function processTest(test, config, stats) {
 
 /**
  * Fix a single screenshot path (transform only, no file copy)
- * @param {string} screenshotPath - Original path with backslashes
+ * @param {string} screenshotPath - Original path with backslashes or forward slashes
  * @param {object} config - Configuration object
  * @returns {string} Fixed path with forward slashes and custom prefix
  */
 function fixScreenshotPath(screenshotPath, config) {
-  // Step 1: Remove leading backslashes and normalize path
-  // Original: "\\spec.cy.js\\template spec -- passes (failed).png"
-  let normalizedPath = screenshotPath.replace(/^\\+/, ''); // Remove leading backslashes
+  // Step 1: Remove leading slashes (both / and \) and normalize path
+  // Original examples:
+  //   "\\spec.cy.js\\template spec -- passes (failed).png"
+  //   "/droitConsultation.cy.js/test (failed).png"
+  let normalizedPath = screenshotPath.replace(/^[/\\]+/, ''); // Remove leading slashes (both / and \)
   normalizedPath = normalizedPath.replace(/\\/g, '/'); // Replace all backslashes with forward slashes
 
   if (config.debug) {
