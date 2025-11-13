@@ -1,6 +1,6 @@
 {
   "name": "cypress-mochawesome-screenshot-fixer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fix screenshot paths in mochawesome JSON reports.",
   "main": "src/index.js",
   "bin": {

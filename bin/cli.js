@@ -25,6 +25,7 @@ Arguments:
 
 Options:
   --screenshotsPath <path> Screenshots path prefix (default: ../screenshots)
+  --keepLastOnly           Keep only the last screenshot when multiple are found
   --verbose                Enable verbose logging
   --debug                  Enable debug mode (very verbose)
   --help                   Show this help message
@@ -35,6 +36,7 @@ Examples:
   cypress-mochawesome-screenshot-fixer merged.json --verbose
   cypress-mochawesome-screenshot-fixer merged.json --screenshotsPath ./images
   cypress-mochawesome-screenshot-fixer merged.json --screenshotsPath ../custom/path --verbose
+  cypress-mochawesome-screenshot-fixer merged.json --keepLastOnly
 
 Documentation:
   https://github.com/chhakib/cypress-mochawesome-screenshot-fixer
@@ -77,7 +79,8 @@ function parseArgs() {
   // Parse options
   const options = {
     verbose: args.includes('--verbose'),
-    debug: args.includes('--debug')
+    debug: args.includes('--debug'),
+    keepLastOnly: args.includes('--keepLastOnly')
   };
 
   // Parse --screenshotsPath
@@ -93,7 +96,7 @@ function parseArgs() {
  * Main CLI function
  */
 function main() {
-  let options;
+  let options = { debug: false, verbose: false };
 
   try {
     // Parse arguments
@@ -122,7 +125,7 @@ function main() {
   } catch (error) {
     console.error(`\nFatal error: ${error.message}`);
 
-    if (options && options.debug) {
+    if (options.debug) {
       console.error('\nStack trace:');
       console.error(error.stack);
     }

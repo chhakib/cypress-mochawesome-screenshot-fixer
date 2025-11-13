@@ -6,6 +6,7 @@ const fs = require('fs');
  * @param {string} jsonPath - Path to the merged JSON file
  * @param {object} options - Configuration options
  * @param {string} options.screenshotsPath - Screenshots path prefix (default: ../screenshots)
+ * @param {boolean} options.keepLastOnly - Keep only the last screenshot when multiple are found (default: false)
  * @param {boolean} options.verbose - Verbose logging (default: false)
  * @param {boolean} options.debug - Debug mode (default: false)
  */
@@ -14,7 +15,8 @@ function fixScreenshotPaths(jsonPath, options = {}) {
   const config = {
     screenshotsPath: options.screenshotsPath || '../screenshots',
     verbose: options.verbose || false,
-    debug: options.debug || false
+    debug: options.debug || false,
+    keepLastOnly: options.keepLastOnly || false
   };
 
   // Statistics
@@ -45,27 +47,30 @@ function fixScreenshotPaths(jsonPath, options = {}) {
         if (config.verbose) {
           console.log('Detected UTF-16 LE encoding with BOM');
         }
-        jsonContent = buffer.toString('utf16le').replace(/^\uFEFF/, ''); // Remove BOM
+        // Skip the 2-byte BOM and convert the rest
+        jsonContent = buffer.slice(2).toString('utf16le');
       }
       // Check for UTF-16 BE BOM (FE FF)
       else if (buffer[0] === 0xFE && buffer[1] === 0xFF) {
         if (config.verbose) {
           console.log('Detected UTF-16 BE encoding with BOM');
         }
-        // Convert from BE to LE
-        const leBuffer = Buffer.alloc(buffer.length);
-        for (let i = 0; i < buffer.length; i += 2) {
-          leBuffer[i] = buffer[i + 1];
-          leBuffer[i + 1] = buffer[i];
+        // Skip the 2-byte BOM and swap bytes for LE conversion
+        const dataBuffer = buffer.slice(2);
+        const leBuffer = Buffer.alloc(dataBuffer.length);
+        for (let i = 0; i < dataBuffer.length; i += 2) {
+          leBuffer[i] = dataBuffer[i + 1];
+          leBuffer[i + 1] = dataBuffer[i];
         }
-        jsonContent = leBuffer.toString('utf16le').replace(/^\uFEFF/, '');
+        jsonContent = leBuffer.toString('utf16le');
       }
       // Check for UTF-8 BOM (EF BB BF)
       else if (buffer.length >= 3 && buffer[0] === 0xEF && buffer[1] === 0xBB && buffer[2] === 0xBF) {
         if (config.verbose) {
           console.log('Detected UTF-8 encoding with BOM');
         }
-        jsonContent = buffer.toString('utf8').replace(/^\uFEFF/, ''); // Remove BOM
+        // Skip the 3-byte BOM
+        jsonContent = buffer.slice(3).toString('utf8');
       }
       // No BOM, assume UTF-8
       else {
@@ -75,12 +80,17 @@ function fixScreenshotPaths(jsonPath, options = {}) {
       jsonContent = buffer.toString('utf8');
     }
 
+    // Clean up any remaining BOM characters that might have slipped through
+    jsonContent = jsonContent.replace(/^\uFEFF/, '');
+
     let reportData;
 
     try {
       reportData = JSON.parse(jsonContent);
     } catch (parseError) {
-      throw new Error(`Invalid JSON file: ${parseError.message}`);
+      // Provide more helpful error message with file preview
+      const preview = jsonContent.substring(0, 100).replace(/\n/g, ' ');
+      throw new Error(`Invalid JSON file: ${parseError.message}\nFile preview: "${preview}..."`);
     }
 
     // Step 2: Validate structure
@@ -170,6 +180,18 @@ function processTest(test, config, stats) {
 
     // Process screenshot paths in context.value
     let modified = false;
+
+    // If keepLastOnly is enabled and there are multiple screenshots, keep only the last one
+    if (config.keepLastOnly && contextObj.value.length > 1) {
+      const removedCount = contextObj.value.length - 1;
+      const lastScreenshot = contextObj.value[contextObj.value.length - 1];
+      contextObj.value = [lastScreenshot];
+      modified = true;
+
+      if (config.verbose) {
+        console.log(`  Kept only last screenshot (removed ${removedCount} screenshot(s))`);
+      }
+    }
 
     contextObj.value.forEach((valueArray, arrayIndex) => {
       if (Array.isArray(valueArray)) {
