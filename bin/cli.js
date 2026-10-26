@@ -26,6 +26,7 @@ Arguments:
 Options:
   --screenshotsPath <path> Screenshots path prefix (default: ../screenshots)
   --keepLastOnly           Keep only the last screenshot when multiple are found
+                           (or set env SCREENSHOT_FIXER_KEEP_LAST_ONLY=true)
   --verbose                Enable verbose logging
   --debug                  Enable debug mode (very verbose)
   --help                   Show this help message
@@ -80,7 +81,8 @@ function parseArgs() {
   const options = {
     verbose: args.includes('--verbose'),
     debug: args.includes('--debug'),
-    keepLastOnly: args.includes('--keepLastOnly')
+    // Can also be enabled via env var, so a shared CI template can stay unchanged
+    keepLastOnly: args.includes('--keepLastOnly') || process.env.SCREENSHOT_FIXER_KEEP_LAST_ONLY === 'true'
   };
 
   // Parse --screenshotsPath
@@ -109,6 +111,7 @@ function main() {
       console.log('Configuration:');
       console.log(`  JSON file: ${jsonPath}`);
       console.log(`  Screenshots path: ${options.screenshotsPath || '../screenshots'}`);
+      console.log(`  Keep last only: ${options.keepLastOnly}`);
       console.log('');
     }
 

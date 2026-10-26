@@ -58,10 +58,23 @@ cypress-mochawesome-screenshot-fixer <json-path> [options]
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--screenshotsPath <path>` | Screenshots path prefix | `../screenshots` |
+| `--keepLastOnly` | Keep only the last screenshot of each test (e.g. Cypress retries). Can also be enabled with `SCREENSHOT_FIXER_KEEP_LAST_ONLY=true` | `false` |
 | `--verbose` | Enable verbose logging | `false` |
 | `--debug` | Enable debug mode (very verbose) | `false` |
 | `--help` | Show help message | - |
 | `--version` | Show version number | - |
+
+#### Environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `SCREENSHOT_FIXER_KEEP_LAST_ONLY` | `true` enables `--keepLastOnly` without changing the command line (useful when the command lives in a CI template shared by several projects) |
+
+```yaml
+# GitLab CI, in the project only
+variables:
+  SCREENSHOT_FIXER_KEEP_LAST_ONLY: "true"
+```
 
 ### Programmatic Usage (Node.js)
 
